@@ -1,0 +1,66 @@
+==================================================
+DESIGN DOCUMENTATION - BOOK MANAGEMENT / LIBRARY APP
+==================================================
+
+1. PURPOSE
+--------------------------------------------------
+This React application serves as a Library Management Interface that allows users to manage and browse a collection of books and e-books. It enables users to view item details, filter items by category or availability, search by title, and add new books using object-oriented domain models. The app demonstrates the integration of OOP principles (inheritance and polymorphism) within a modern React component hierarchy.
+
+2. COMPONENT TREE
+--------------------------------------------------
+App
+ ├── Header
+ ├── FilterBar
+ ├── AddItemForm
+ └── ItemList
+      └── ItemCard
+
+3. COMPONENT LIST & PROPS
+--------------------------------------------------
+- App:
+  * Purpose: Top-level root component. Holds global inventory state and handles filtered lists.
+  * Props: None
+  * State: items (Array of Book/EBook instances), searchQuery (string), selectedCategory (string)
+
+- Header:
+  * Purpose: Renders application title and summary statistics (e.g., total items count).
+  * Props: totalItems (number)
+  * State: None
+
+- FilterBar:
+  * Purpose: Provides input controls for searching and filtering items.
+  * Props: searchQuery (string), onSearchChange (function), selectedCategory (string), onCategoryChange (function)
+  * State: None
+
+- AddItemForm:
+  * Purpose: Renders a form to create and instantiate new Book or EBook objects.
+  * Props: onAddItem (function)
+  * State: title (string), author (string), isEbook (boolean), fileSize (string/number), price (number)
+
+- ItemList:
+  * Purpose: Receives the filtered array of items and renders a list of ItemCard components.
+  * Props: items (Array of Book/EBook objects)
+  * State: None
+
+- ItemCard:
+  * Purpose: Displays individual book details and polymorphic rendering via instance methods.
+  * Props: item (Book or EBook instance)
+  * State: None
+
+4. STATE OWNERSHIP TABLE
+--------------------------------------------------
++------------------+------------------+-----------------------------------------------+
+| State Name       | Owner Component  | Reason for Ownership                          |
++------------------+------------------+-----------------------------------------------+
+| items            | App              | Main source of truth needed by List & Form    |
+| searchQuery      | App              | Shared between FilterBar and ItemList logic   |
+| selectedCategory | App              | Shared between FilterBar and ItemList logic   |
+| formData         | AddItemForm      | Isolated input form state before submission   |
++------------------+------------------+-----------------------------------------------+
+
+5. POLYMORPHISM NOTES
+--------------------------------------------------
+Polymorphism is utilized in the UI layer through OOP model instances:
+- Both Book and EBook classes share common base interfaces/methods (e.g., getDetails() or getFormattedPrice()).
+- The ItemCard component accepts a generic 'item' prop without worrying whether it is a physical Book or an EBook.
+- ItemCard dynamically calls polymorphic methods like `item.getDetails()` or checks `item instanceof EBook` to render specific attributes (like download size or file format) seamlessly.
