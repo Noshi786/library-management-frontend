@@ -73,4 +73,8 @@ export default class Library {
   listMembers() {
     return [...this.#members];
   }
+
+  listAllItems() {
+  return [...this.#items]; // Spread operator to prevent outside mutation
+  }
 }
