@@ -7,8 +7,25 @@ export default class EBook extends Book {
     this.format = format;
   }
 
+  getType() {
+    return 'EBook';
+  }
+
   getLoanDays() {
     return 30;
+  }
+
+  getLateFeePerDay() {
+    return 0; // Digital copies expire automatically
+  }
+
+  getDetails() {
+    // Reuses Book details using super.getDetails() and appends EBook-specific details via spread operator
+    return [
+      ...super.getDetails(),
+      { label: 'File size', value: `${this.fileSizeMB} MB` },
+      { label: 'Format', value: this.format }
+    ];
   }
 
   getDescription() {

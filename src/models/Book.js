@@ -7,8 +7,23 @@ export default class Book extends LibraryItem {
     this.genre = genre;
   }
 
+  getType() {
+    return 'Book';
+  }
+
   getLoanDays() {
     return 14;
+  }
+
+  getLateFeePerDay() {
+    return 0.5;
+  }
+
+  getDetails() {
+    return [
+      { label: 'Author', value: this.author },
+      { label: 'Genre', value: this.genre }
+    ];
   }
 
   getDescription() {
