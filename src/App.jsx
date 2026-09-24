@@ -34,10 +34,10 @@ export default function App() {
       try {
         if (item.isAvailable() || action === 'borrow') {
           libraryInstance.borrowItem(Number(selectedMemberId), id);
-          setNotice({ type: 'success', message: `${item.getTitle()} borrowed successfully.` });
+          setNotice({ type: 'success', message: `${item.getTitle()} borrowed successfully by ${selectedMember.name}.` });
         } else {
           libraryInstance.returnItem(Number(selectedMemberId), id);
-          setNotice({ type: 'success', message: `${item.getTitle()} returned successfully.` });
+          setNotice({ type: 'success', message: `${item.getTitle()} returned successfully by ${selectedMember.name}.` });
         }
         refreshItems();
       } catch (error) {
@@ -146,7 +146,19 @@ export default function App() {
 function LateFeePanel({ member }) {
   const [daysLate, setDaysLate] = useState({});
   const borrowedItems = member ? member.getBorrowedItems() : [];
-  const totalFee = borrowedItems.reduce((total, item) => total + item.calculateLateFee(Number(daysLate[item.id] || 0)), 0);
+  const getFeeDetails = (item) => {
+    const rawDays = daysLate[item.id] ?? '';
+    const days = rawDays === '' ? 0 : Number(rawDays);
+    const isInvalid = rawDays !== '' && (!Number.isFinite(days) || days < 0);
+
+    return {
+      days,
+      isInvalid,
+      fee: isInvalid ? 0 : item.calculateLateFee(days)
+    };
+  };
+
+  const totalFee = borrowedItems.reduce((total, item) => total + getFeeDetails(item).fee, 0);
 
   return (
     <section className="late-fee-panel">
@@ -160,13 +172,22 @@ function LateFeePanel({ member }) {
         <p>{member.name} has no borrowed items yet.</p>
       ) : (
         <div className="fee-list">
-          {borrowedItems.map(item => (
-            <label key={item.id} className="fee-row">
-              <span><strong>{item.getTitle()}</strong><small>{item.getType()} · ${item.getLateFeePerDay().toFixed(2)}/day</small></span>
-              <input type="number" min="0" value={daysLate[item.id] || ''} placeholder="Days late" onChange={event => setDaysLate({ ...daysLate, [item.id]: event.target.value })} />
-              <b>${item.calculateLateFee(Number(daysLate[item.id] || 0)).toFixed(2)}</b>
-            </label>
-          ))}
+          {borrowedItems.map(item => {
+            const { days, isInvalid, fee } = getFeeDetails(item);
+
+            return (
+              <label key={item.id} className="fee-row">
+                <span><strong>{item.getTitle()}</strong><small>{item.getType()} · ${item.getLateFeePerDay().toFixed(2)}/day</small></span>
+                <input type="number" min="0" value={daysLate[item.id] ?? ''} placeholder="Days late" onChange={event => setDaysLate({ ...daysLate, [item.id]: event.target.value })} />
+                <b>${fee.toFixed(2)}</b>
+                {isInvalid ? (
+                  <small className="inline-message error" role="alert">Days late must be zero or greater.</small>
+                ) : days > 0 ? (
+                  <small className="inline-message success">Late fee calculated for {days} day{days === 1 ? '' : 's'}.</small>
+                ) : null}
+              </label>
+            );
+          })}
           <strong className="fee-total">Total late fee: ${totalFee.toFixed(2)}</strong>
         </div>
       )}
